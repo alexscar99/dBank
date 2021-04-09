@@ -39,15 +39,15 @@ contract dBank {
         // check if msg.sender deposit status is true
         // assign msg.sender ether deposit balance to variable for event
 
-        // check user's hodl time
+        // check user's hold time
 
-        // calc interest per second
-        // calc accrued interest
+        // calculate interest per second
+        // calculate accrued interest
 
         // send eth to user
         // send interest in tokens to user
 
-        // reset depositer data
+        // reset depositor data
 
         // emit event
     }
@@ -60,7 +60,7 @@ contract dBank {
 
         // calc tokens amount to mint, 50% of msg.value
 
-        // mint&send tokens to user
+        // mint and send tokens to user
 
         // activate borrower's loan status
 
@@ -69,9 +69,10 @@ contract dBank {
 
     function payOff() public {
         // check if loan is active
-        // transfer tokens from user back to the contract
 
-        // calc fee
+        // transfer tokens from user back to contract
+
+        // calculate fee
 
         // send user's collateral minus fee
 
