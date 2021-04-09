@@ -1,5 +1,5 @@
 # dBank
-Simple example DeFi app on Ethereum blockchain, forked from [@gwmccubbin tutorial](https://github.com/gwmccubbin)
+Simple example DeFi app on Ethereum blockchain, forked from [@gwmccubbin](https://github.com/gwmccubbin)'s tutorial
 
 - Users can add Ether to a bank (DAO)
 
