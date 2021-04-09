@@ -1,8 +1,8 @@
 # dBank
-Simple example DeFi app on Ethereum blockchain, forked from @gwmccubbin tutorial
+Simple example DeFi app on Ethereum blockchain, forked from [@gwmccubbin tutorial](https://github.com/gwmccubbin)
 
-- Users can add Ether to a bank
+- Users can add Ether to a bank (DAO)
 
-- Users earn interest
+- Users earn interest over time
 
 - Users get paid out interest in the "DBC" token created
