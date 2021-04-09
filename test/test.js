@@ -152,4 +152,35 @@ contract('dBank', ([deployer, user]) => {
       });
     });
   });
+
+  describe('testing payoff...', () => {
+    describe('success', () => {
+      beforeEach(async () => {
+        await dbank.borrow({ value: 10 ** 16, from: user }); // 0.01 ETH
+        await token.approve(dbank.address, (5 * (10 ** 15)).toString(), { from: user });
+        await dbank.payOff({ from: user });
+      });
+
+      it('should set user token balance to 0', async () => {
+        expect(Number(await token.balanceOf(user))).to.eq(0);
+      });
+
+      it('adds fee to dBank ETH balance', async () => {
+        expect(Number(await web3.eth.getBalance(dbank.address))).to.eq(10 ** 15); // 10% of 0.01 ETH
+      });
+
+      it('resets borrower data', async () => {
+        expect(Number(await dbank.collateralEther(user))).to.eq(0);
+        expect(await dbank.isBorrowed(user)).to.eq(false);
+      });
+    });
+
+    describe('failure', () => {
+      it('rejects attempts to pay off', async () => {
+        await dbank.borrow({ value: 10 ** 16, from: user }); // 0.01 ETH
+        await token.approve(dbank.address, (5 * (10 ** 15)).toString(), { from: user });
+        await dbank.payOff({ from: deployer }).should.be.rejectedWith(EVM_REVERT); // wrong user
+      });
+    });
+  });
 });
