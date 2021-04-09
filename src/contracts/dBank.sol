@@ -90,16 +90,21 @@ contract dBank {
     }
 
     function payOff() public {
-        // check if loan is active
-
+        require(isBorrowed[msg.sender] == true, "Error, no active loan");
         // transfer tokens from user back to contract
+        require(token.transferFrom(msg.sender, address(this), collateralEther[msg.sender] / 2), "Error, can't receive tokens");
 
-        // calculate fee
+        // calculate 10% fee
+        uint fee = collateralEther[msg.sender] / 10;
 
         // send user's collateral minus fee
+        msg.sender.transfer(collateralEther[msg.sender] - fee);
 
         // reset borrower's data
+        collateralEther[msg.sender] = 0;
+        isBorrowed[msg.sender] = false;
 
-        // emit event
+        // emit PayOff event
+        emit PayOff(msg.sender, fee);
     }
 }
