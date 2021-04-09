@@ -4,16 +4,21 @@ pragma solidity >=0.6.0 <0.8.0;
 import "./Token.sol";
 
 contract dBank {
-    // add state variables and mappings
+    // state variable and mappings
     Token private token;
 
     mapping(address => uint) public etherBalanceOf;
     mapping(address => uint) public depositStart;
-    mapping(address => bool) public isDeposited;
+    mapping(address => uint) public collateralEther;
 
-    // add Deposit and Withdraw events
+    mapping(address => bool) public isDeposited;
+    mapping(address => bool) public isBorrowed;
+
+    // events
     event Deposit(address indexed user, uint etherAmount, uint timeStart);
     event Withdraw(address indexed user, uint etherAmount, uint depositTime, uint interest);
+    event Borrow(address indexed user, uint collateralEtherAmount, uint borrowedTokenAmount);
+    event PayOff(address indexed user, uint fee);
 
     // pass as constructor argument deployed Token contract
     constructor(Token _token) public {
@@ -21,23 +26,19 @@ contract dBank {
     }
 
     function deposit() payable public {
-        // check if msg.sender didn't already deposit funds
         require(isDeposited[msg.sender] == false, "Error, deposit already active");
-        // check if msg.value is >= 0.01 ETH
         require(msg.value >= 1e16, "Error, deposit must be >= 0.01 ETH");
 
+        // set ETH balance for sender and start time of deposit for sender
         etherBalanceOf[msg.sender] = etherBalanceOf[msg.sender] + msg.value;
         depositStart[msg.sender] = depositStart[msg.sender] + block.timestamp;
 
-        // active deposit status & set msg.sender deposit status to true
+        // make isDeposited true for sender and emit 'Deposit' event
         isDeposited[msg.sender] = true;
-
-        // emit Deposit event
         emit Deposit(msg.sender, msg.value, block.timestamp);
     }
 
     function withdraw() public {
-        // check if msg.sender deposit status is true, store user's balance in var
         require(isDeposited[msg.sender] == true, "Error, no previous deposit");
         uint userBalance = etherBalanceOf[msg.sender];
 
@@ -55,7 +56,7 @@ contract dBank {
             // for deposit 0.02 ETH, (etherBalanceOf[msg.sender] / 1e16) = 2 (doubled or (2*31668017)/sec)
         uint interest = interestPerSecond * depositTime;
 
-        // send eth to user, send interest in tokens to user
+        // send funds to user
         msg.sender.transfer(userBalance);
         token.mint(msg.sender, interest);
 
@@ -69,18 +70,23 @@ contract dBank {
     }
 
     function borrow() payable public {
-        // check if collateral is >= than 0.01 ETH
-        // check if user doesn't have active loan
+        require(msg.value >= 1e16, "Error, collateral must be >= 0.01 ETH");
+        require(isBorrowed[msg.sender] == false, "Error, loan already taken");
 
-        // add msg.value to ether collateral
+        // this ETH will be locked until user pays off the loan (payOff function)
+        collateralEther[msg.sender] = collateralEther[msg.sender] + msg.value;
 
         // calc tokens amount to mint, 50% of msg.value
+        uint tokensToMint = collateralEther[msg.sender] / 2;
 
         // mint and send tokens to user
+        token.mint(msg.sender, tokensToMint);
 
         // activate borrower's loan status
+        isBorrowed[msg.sender] = true;
 
-        // emit event
+        // emit Borrow event
+        emit Borrow(msg.sender, collateralEther[msg.sender], tokensToMint);
     }
 
     function payOff() public {
